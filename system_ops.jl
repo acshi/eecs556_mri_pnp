@@ -15,7 +15,7 @@ function sys_forw(image, B::AbstractMatrix)
     (M,N) = size(B)
     image = reshape(image,(M,N))
 
-    ksp = fftq(fftq(image,2),1)
+    ksp = fftq2(image)
     ksp = ksp[B]
 
     return ksp
@@ -28,7 +28,7 @@ function sys_adj(ksp, B::AbstractMatrix)
     ksp_FS = Complex.(zeros(M,N))
     ksp_FS[B] = ksp
 
-    image = ifftq(ifftq(ksp_FS,2),1)
+    image = ifftq2(ksp_FS)
 
     return image[:]
 end

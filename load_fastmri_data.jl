@@ -10,7 +10,7 @@ function load_fastmri_data(file::String;
     kspace = h5read(file,"kspace")
     (nkx,nky,nkz) = size(kspace)
 
-    image = ifftq(ifftq(kspace,2),1)
+    image = ifftq2(kspace)
 
     if ret3D
         return image
