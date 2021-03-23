@@ -34,11 +34,11 @@ j2 = jim(log.(abs.(reshape(y,Int(round(M/R)),N))),title="k-space")
 x0 = reshape(A'*y,M,N)
 j3 = jim(abs.(x0[end:-1:1,end:-1:1]),title="recon")
 
-j4 = jim(abs.(imref[end:-1:1,end:-1:1]) - abs.(imrec[end:-1:1,end:-1:1]),title="subtraction")
+j4 = jim(abs.(imref[end:-1:1,end:-1:1]) - abs.(x0[end:-1:1,end:-1:1]),title="subtraction")
 
 plot(j1,j2,j3,j4)
 
 
 # recon data w/ admm algorithm
-
-x_hat = admm((z,η,μ) -> primal(z,η,μ,A,B,y), denoiser, 1, x0,, )
+# to-do: write/load denoiser function
+x_hat = admm((z,η,μ) -> primal(z,η,μ,A,B,y), denoiser, 1, x0, niter=10)
