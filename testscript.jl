@@ -8,6 +8,8 @@ include("utils.jl")
 include("load_fastmri_data.jl")
 include("create_sampling_mask.jl")
 include("system_ops.jl")
+include("admm.jl")
+include("primal.jl")
 
 # load in data from fastmri file
 imref = load_fastmri_data("file1000000.h5")
@@ -29,9 +31,14 @@ y = A*imref[:]
 j2 = jim(log.(abs.(reshape(y,Int(round(M/R)),N))),title="k-space")
 
 # applying adjoint model to k-space reconstructs the image (poorly)
-imrec = reshape(A'*y,M,N)
-j3 = jim(abs.(imrec[end:-1:1,end:-1:1]),title="recon")
+x0 = reshape(A'*y,M,N)
+j3 = jim(abs.(x0[end:-1:1,end:-1:1]),title="recon")
 
 j4 = jim(abs.(imref[end:-1:1,end:-1:1]) - abs.(imrec[end:-1:1,end:-1:1]),title="subtraction")
 
 plot(j1,j2,j3,j4)
+
+
+# recon data w/ admm algorithm
+
+x_hat = admm((z,η,μ) -> primal(z,η,μ,A,B,y), denoiser, 1, x0,, )

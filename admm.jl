@@ -21,6 +21,7 @@ function admm(update_x::Function,
 
     M,N = size(x0)
 
+    # to-do: check what these should actually be initialized as
     x = x0[:];
     z = zeros(size(x));
     η = zeros(size(x));
