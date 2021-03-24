@@ -26,7 +26,7 @@
 using Flux
 using JSON
 
-function dncnn()
+function create_dncnn()
     model_json = JSON.parsefile(joinpath(dirname(@__FILE__), "dncnn_model.json"));
 
     filter_size = (3, 3);
@@ -73,22 +73,24 @@ function padto(img, dims)
     return padded;
 end
 
-net = dncnn();
+function dncnn_denoise(img)
+    net = create_dncnn();
 
-using FileIO:load,save
-using ImageCore
+    img = reinterpret(Float32, float.(Gray.(img)));
+    denoising_residual = net(Flux.batch([Flux.batch([img])]));
+    padded_residual = padto(denoising_residual, size(img));
+    denoised_img = max.(0.0f32, img .- padded_residual);
+    denoised_gray_img = reinterpret(Gray{Float32}, denoised_img);
 
-img = load(joinpath(dirname(@__FILE__), "data/mri_example.png"));
-img = reinterpret(Float32, float.(Gray.(img)));
+    return denoised_gray_img;
+end
 
-denoising_residual = net(Flux.batch([Flux.batch([img])]));
-padded_residual = padto(denoising_residual, size(img));
-denoised_img = max.(0.0f32, img .- padded_residual);
+# using FileIO:load,save
+# using ImageCore
 
-# shifted_img = denoised_img .- minimum(denoised_img);
-# scaled_img = shifted_img ./ maximum(shifted_img);
-denoised_gray_img = reinterpret(Gray{Float32}, denoised_img);
-save(joinpath(dirname(@__FILE__), "results/denoised_mri_example.png"), denoised_gray_img);
+# img = load(joinpath(dirname(@__FILE__), "data/mri_example.png"));
+# denoised_img = dncnn_denoise(img);
+# save(joinpath(dirname(@__FILE__), "results/denoised_mri_example.png"), denoised_img);
 
 # W = rand(2, 5)
 # b = rand(2)
