@@ -13,21 +13,21 @@
 
 using LinearMapsAA
 
-function primal(z::AbstractVector,
-    η::AbstractVector,
+function primal(z::Any,
+    η::Any,
     μ::Real,
-    A::AbstractVector,
-    B::AbstractVector,
-    y::AbstractVector)
+    A::Any,
+    B::Any,
+    y::Any)
 
     (M,N) = size(B)
 
     # to-do: the derivation here is definitely worth spot-checking w/ Fessler
     xgrad = reshape(A'*y + μ*(z-η), (M,N))
-    binv = 1./(B.+μ)
+    binv = 1 ./(B.+μ)
 
     x = fftq2(binv.*ifftq2(xgrad))
 
-    return x
+    return x[:]
 
 end

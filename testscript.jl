@@ -41,4 +41,4 @@ plot(j1,j2,j3,j4)
 
 # recon data w/ admm algorithm
 # to-do: write/load denoiser function
-x_hat = admm((z,η,μ) -> primal(z,η,μ,A,B,y), denoiser, 1, x0, niter=10)
+x_hat = admm((z,η,μ) -> primal(z,η,μ,A,B,y), (x) -> x, 1, x0, niter=10)

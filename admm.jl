@@ -15,11 +15,10 @@
 function admm(update_x::Function,
     update_z::Function,
     μ::Real,
-    x0::AbstractVector;
-    niter = 10;
-    )
+    x0::AbstractMatrix;
+    niter = 10)
 
-    M,N = size(x0)
+    (M,N) = size(x0)
 
     # to-do: check what these should actually be initialized as
     x = x0[:];
