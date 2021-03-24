@@ -10,6 +10,7 @@ include("create_sampling_mask.jl")
 include("system_ops.jl")
 include("admm.jl")
 include("primal.jl")
+include("dncnn.jl")
 
 # load in data from fastmri file
 imref = load_fastmri_data("file1000000.h5")
@@ -23,7 +24,7 @@ R = 3.76
 B = create_sampling_mask(M,N,R,seed=0)
 R = M*N/sum(B)
 
-# create linear map/false matrix A that describes the MRI system model
+# create linear map A that describes the MRI system model
 A = LinearMapAA(x -> sys_forw(x,B),x -> sys_adj(x,B), (Int(M*N/R), M*N))
 
 # applying model to reference image generates an undersampled k-space
@@ -41,4 +42,6 @@ plot(j1,j2,j3,j4)
 
 # recon data w/ admm algorithm
 # to-do: write/load denoiser function
-x_hat = admm((z,η,μ) -> primal(z,η,μ,A,B,y), (x) -> x, 1, x0, niter=10)
+x_hat = admm((z,η,μ) -> primal(z,η,μ,A,B,y), (x) -> dncnn_denoise(abs.(x)), 1, x0, niter=4)
+
+j5 = jim(abs.(reshape(x_hat,(M,N))[end:-1:1,end:-1:1]),title="admm")
