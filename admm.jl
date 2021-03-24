@@ -20,15 +20,17 @@ function admm(update_x::Function,
 
     (M,N) = size(x0)
 
-    # to-do: check what these should actually be initialized as
-    x = x0[:];
-    z = zeros(size(x));
-    η = zeros(size(x));
+    z = x0[:]
+    η = Complex.(zeros(size(z)));
+    x = update_x(z,η,μ)
 
     for i = 1:niter
+        display(i)
+
+        z = update_z(reshape(x.+η,M,N))[:]
+        η = η .+ (x.-z)
+
         x = update_x(z,η,μ);
-        z = update_z(reshape(x+η,M,N))[:]
-        η = η + (x-z)
     end
 
     return x
