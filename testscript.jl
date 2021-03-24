@@ -41,7 +41,8 @@ plot(j1,j2,j3,j4)
 
 
 # recon data w/ admm algorithm
-# to-do: write/load denoiser function
-x_hat = admm((z,η,μ) -> primal(z,η,μ,A,B,y), (x) -> dncnn_denoise(abs.(x)), 1, x0, niter=4)
+# the primal function is still a little unstable. If you're testing another
+# denoiser, lmk, as I'd like to double check it once we have those ready
+x_hat = admm((z,η,μ) -> primal(z,η,μ,A,B,y), (x) -> dncnn_denoise(Float32.(abs.(x))), 1, x0, niter=10)
 
 j5 = jim(abs.(reshape(x_hat,(M,N))[end:-1:1,end:-1:1]),title="admm")

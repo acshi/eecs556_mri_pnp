@@ -23,7 +23,7 @@ function primal(z::Any,
     (M,N) = size(B)
 
     xgrad = reshape(A'*y .+ μ*(z-η), (M,N))
-    binv = 1/μ
+    binv = 1 ./(B.+μ)
 
     x = fftq2(binv.*ifftq2(xgrad))
 
