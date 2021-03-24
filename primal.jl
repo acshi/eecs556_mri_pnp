@@ -22,9 +22,8 @@ function primal(z::Any,
 
     (M,N) = size(B)
 
-    # to-do: the derivation here is definitely worth spot-checking w/ Fessler
-    xgrad = reshape(A'*y + μ*(z-η), (M,N))
-    binv = 1 ./(B.+μ)
+    xgrad = reshape(A'*y .+ μ*(z-η), (M,N))
+    binv = 1/μ
 
     x = fftq2(binv.*ifftq2(xgrad))
 
