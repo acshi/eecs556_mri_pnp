@@ -92,11 +92,11 @@ function float32_to_img(img)
     return reinterpret(Gray{Float32}, denoised_img);
 end
 
-using FileIO:load,save
+# using FileIO:load,save
 
-img = load(joinpath(dirname(@__FILE__), "data/noisy_statue.jpg"));
-denoised_img = float32_to_img(dncnn_denoise(img_to_float32(img)));
-save(joinpath(dirname(@__FILE__), "results/denoised_noisy_statue.jpg"), denoised_img);
+# img = load(joinpath(dirname(@__FILE__), "data/noisy_statue.jpg"));
+# denoised_img = float32_to_img(dncnn_denoise(img_to_float32(img)));
+# save(joinpath(dirname(@__FILE__), "results/denoised_noisy_statue.jpg"), denoised_img);
 
 # W = rand(2, 5)
 # b = rand(2)
