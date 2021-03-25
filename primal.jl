@@ -13,12 +13,12 @@
 
 using LinearMapsAA
 
-function primal(z::Any,
-    η::Any,
+function primal(z::AbstractVector,
+    η::AbstractVector,
     μ::Real,
     A::Any,
-    B::Any,
-    y::Any)
+    B::AbstractMatrix,
+    y::AbstractVector)
 
     (M,N) = size(B)
 
