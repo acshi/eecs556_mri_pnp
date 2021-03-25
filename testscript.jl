@@ -18,18 +18,18 @@ imref = load_fastmri_data("file1000000.h5")
 j1 = jim(abs.(imref[end:-1:1,end:-1:1]),title="reference")
 
 # def acceleration factor for sampling mask
-R = 3.76
+R = 3
+Mus = Int(round(M/R))
 
 # create 1D random undersampling mask
 B = create_sampling_mask(M,N,R,seed=0)
-R = M*N/sum(B)
 
 # create linear map A that describes the MRI system model
-A = LinearMapAA(x -> sys_forw(x,B),x -> sys_adj(x,B), (Int(M*N/R), M*N))
+A = LinearMapAA(x -> sys_forw(x,B),x -> sys_adj(x,B), (Mus*N, M*N))
 
 # applying model to reference image generates an undersampled k-space
 y = A*imref[:]
-j2 = jim(log.(abs.(reshape(y,Int(round(M/R)),N))),title="k-space")
+j2 = jim(log.(abs.(reshape(y,Mus,N))),title="k-space")
 
 # applying adjoint model to k-space reconstructs the image (poorly)
 x0 = reshape(A'*y,M,N)
