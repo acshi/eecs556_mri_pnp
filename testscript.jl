@@ -29,20 +29,18 @@ A = LinearMapAA(x -> sys_forw(x,B),x -> sys_adj(x,B), (Mus*N, M*N))
 
 # applying model to reference image generates an undersampled k-space
 y = A*imref[:]
-j2 = jim(log.(abs.(reshape(y,Mus,N))),title="k-space")
 
 # applying adjoint model to k-space reconstructs the image (poorly)
 x0 = reshape(A'*y,M,N)
-j3 = jim(abs.(x0[end:-1:1,end:-1:1]),title="recon")
-
-j4 = jim(abs.(imref[end:-1:1,end:-1:1]) - abs.(x0[end:-1:1,end:-1:1]),title="subtraction")
-
-plot(j1,j2,j3,j4)
-
+j2 = jim(abs.(x0[end:-1:1,end:-1:1]),title="zero-filled recon")
 
 # recon data w/ admm algorithm
 # the primal function is still a little unstable. If you're testing another
 # denoiser, lmk, as I'd like to double check it once we have those ready
 x_hat = admm((z,η,μ) -> primal(z,η,μ,A,B,y), (x) -> dncnn_denoise(Float32.(abs.(x))), 1, x0, niter=10)
+x_hat = reshape(x_hat,M,N)
 
-j5 = jim(abs.(reshape(x_hat,(M,N))[end:-1:1,end:-1:1]),title="admm")
+j3 = jim(abs.(x_hat[end:-1:1,end:-1:1]),title="admm recon")
+j4 = jim(abs.(imref[end:-1:1,end:-1:1]) - abs.(x_hat[end:-1:1,end:-1:1]),title="subtraction")
+
+plot(j1,j2,j3,j4)
