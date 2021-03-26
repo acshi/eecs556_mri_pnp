@@ -16,7 +16,7 @@ function admm(update_x::Function,
     update_z::Function,
     μ::Real,
     x0::AbstractMatrix;
-    niter = 10)
+    niter=10)
 
     (M,N) = size(x0)
 
@@ -25,7 +25,7 @@ function admm(update_x::Function,
     x = update_x(z,η,μ)
 
     for i = 1:niter
-        display(i)
+        @info "iter $i"
 
         z = update_z(reshape(x.+η,M,N))[:]
         η = η .+ (x.-z)
