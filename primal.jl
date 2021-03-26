@@ -25,7 +25,7 @@ function primal(z::AbstractVector,
     xgrad = reshape(A'*y .+ μ*(z-η), (M,N))
     binv = 1 ./(B.+μ)
 
-    x = fftq2(binv.*ifftq2(xgrad))
+    x = ifftq2(binv.*fftq2(xgrad))
 
     return x[:]
 
