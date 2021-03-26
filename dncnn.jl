@@ -78,7 +78,7 @@ end
 net = create_dncnn();
 
 function dncnn_denoise(img)
-    padded_img = padarray(img, Pad(:replicate, 20, 20))
+    padded_img = padarray(img, Fill(0.0, (20, 20)))
 
     denoising_residual = net(Flux.batch([Flux.batch([padded_img])]));
 
