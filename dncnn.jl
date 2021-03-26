@@ -26,6 +26,7 @@
 using Flux
 using JSON
 using ImageCore
+using ImageFiltering
 
 function create_dncnn()
     model_json = JSON.parsefile(joinpath(dirname(@__FILE__), "dncnn_model.json"));
@@ -77,7 +78,10 @@ end
 net = create_dncnn();
 
 function dncnn_denoise(img)
-    denoising_residual = net(Flux.batch([Flux.batch([img])]));
+    padded_img = padarray(img, Pad(:replicate, 20, 20))
+
+    denoising_residual = net(Flux.batch([Flux.batch([padded_img])]));
+
     padded_residual = padto(denoising_residual, size(img));
     denoised_img = max.(0.0f32, img .- padded_residual);
 
