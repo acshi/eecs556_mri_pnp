@@ -89,14 +89,16 @@ function img_to_float32(img)
 end
 
 function float32_to_img(img)
-    return reinterpret(Gray{Float32}, denoised_img);
+    return reinterpret(Gray{Float32}, img);
 end
 
-# using FileIO:load,save
+if abspath(PROGRAM_FILE) == @__FILE__
+    using FileIO:load,save
 
-# img = load(joinpath(dirname(@__FILE__), "data/noisy_statue.jpg"));
-# denoised_img = float32_to_img(dncnn_denoise(img_to_float32(img)));
-# save(joinpath(dirname(@__FILE__), "results/denoised_noisy_statue.jpg"), denoised_img);
+    img = load(joinpath(dirname(@__FILE__), "data/noisy_statue.jpg"));
+    denoised_img = float32_to_img(dncnn_denoise(img_to_float32(img)));
+    save(joinpath(dirname(@__FILE__), "results/denoised_noisy_statue.jpg"), denoised_img);
+end
 
 # W = rand(2, 5)
 # b = rand(2)
