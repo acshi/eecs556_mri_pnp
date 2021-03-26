@@ -17,29 +17,37 @@ using Random: seed!
 function create_sampling_mask(M::Int,N::Int,R;
     seed::Int=0)
 
-    # set seed
-    seed!(seed);
-    rm=rand(M)
+    if R != 1
 
-    # generate 1D polynomial undersampling pattern
-    kpe = 2*(-M/2:1:M/2-1)/M
-    qfun = (x,p) -> abs(abs(x)-1)^p
+        # set seed
+        seed!(seed);
+        rm=rand(M)
 
-    # run a bin search on p to create a mask w/ specific acceleration factor
-    b = 0;
-    pmin = 1; pmax = 10;
+        # generate 1D polynomial undersampling pattern
+        kpe = 2*(-M/2:1:M/2-1)/M
+        qfun = (x,p) -> abs(abs(x)-1)^p
 
-    while sum(b) != round(M/R)
-        pc = (pmin+pmax)/2
-        b = rm .< qfun.(kpe,pc)
+        # run a bin search on p to create a mask w/ specific acceleration factor
+        b = 0;
+        pmin = 1; pmax = 10;
 
-        if sum(b) > round(M/R)
-            pmin = pc
-        else
-            pmax = pc
+        while sum(b) != round(M/R)
+            pc = (pmin+pmax)/2
+            b = rm .< qfun.(kpe,pc)
+
+            if sum(b) > round(M/R)
+                pmin = pc
+            else
+                pmax = pc
+            end
         end
-    end
 
-    return Bool.(b*ones(N)')
+        return Bool.(b*ones(N)')
+
+    else # if r = 1
+
+        return Bool.(ones(M,N))
+
+    end
 
 end
