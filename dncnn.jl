@@ -25,8 +25,10 @@
 #             L.append(nn.ReLU(inplace=True))
 using Flux
 using JSON
+using Images
 using ImageCore
 using ImageFiltering
+using Noise
 
 function create_dncnn()
     model_json = JSON.parsefile(joinpath(dirname(@__FILE__), "dncnn_model.json"));
@@ -36,14 +38,14 @@ function create_dncnn()
 
     weight = Float32.(reshape(model_json["model.0.weight"][2], (3, 3, 1, 64)));
     bias = Float32.(model_json["model.0.bias"][2]);
-    head = Conv(filter_size, 1 => 64, relu, weight=weight, bias=bias);
+    head = Conv(filter_size, 1 => 64, relu, pad=1, weight=weight, bias=bias);
 
     body_layers = [];
 
     for i in 1:18
         weight = Float32.(reshape(model_json["model." * string(i * 2) * ".weight"][2], (3, 3, 64, 64)));
         bias = Float32.(model_json["model." * string(i * 2) * ".bias"][2]);
-        body_layer = Conv(filter_size, 64 => 64, relu, weight=weight, bias=bias);
+        body_layer = Conv(filter_size, 64 => 64, relu, pad=1, weight=weight, bias=bias);
         body_layers = vcat(body_layers, body_layer);
     end
 
@@ -52,7 +54,7 @@ function create_dncnn()
 
     weight = Float32.(reshape(model_json["model.38.weight"][2], (3, 3, 64, 1)));
     bias = Float32.(model_json["model.38.bias"][2]);
-    tail = Conv(filter_size, 64 => 1, weight=weight, bias=bias);
+    tail = Conv(filter_size, 64 => 1, pad=1, weight=weight, bias=bias);
 
     layers = vcat(head, body_layers, tail);
 
@@ -78,14 +80,13 @@ end
 net = create_dncnn();
 
 function dncnn_denoise(img)
-    padded_img = padarray(img, Fill(0.0, (20, 20)))
+    denoising_residual = net(Flux.batch([Flux.batch([img])]));
 
-    denoising_residual = net(Flux.batch([Flux.batch([padded_img])]));
+    # padded_residual = padto(denoising_residual, size(img));
+    padded_residual = denoising_residual;
+    denoised_img = clamp01nan.(img .- padded_residual);
 
-    padded_residual = padto(denoising_residual, size(img));
-    denoised_img = max.(0.0f32, img .- padded_residual);
-
-    return denoised_img;
+    return denoised_img[:,:];
 end
 
 function img_to_float32(img)
@@ -99,9 +100,27 @@ end
 if abspath(PROGRAM_FILE) == @__FILE__
     using FileIO:load,save
 
-    img = load(joinpath(dirname(@__FILE__), "data/noisy_statue.jpg"));
-    denoised_img = float32_to_img(dncnn_denoise(img_to_float32(img)));
-    save(joinpath(dirname(@__FILE__), "results/denoised_noisy_statue.jpg"), denoised_img);
+    img = img_to_float32(load(joinpath(dirname(@__FILE__), "data/cameraman.png")));
+    # img = img_to_float32(load("eecs556_mri_pnp/data/cameraman.png"));
+
+    σNoise = 0.2
+    μNoise = 0.0
+    noisy_img = clamp01nan.(add_gauss(img, σNoise, μNoise, clip=true));
+
+    denoised_img = dncnn_denoise(noisy_img);
+
+    noisy_psnr = assess_psnr(noisy_img, img);
+    println("Noisy PSNR: " * string(noisy_psnr));
+
+    dncnn_psnr = assess_psnr(denoised_img, img);
+    println("DnCNN PSNR: " * string(dncnn_psnr));
+
+    # save("eecs556_mri_pnp/results/cameraman.png", float32_to_img(img));
+    # save("eecs556_mri_pnp/results/noisy_cameraman.png", float32_to_img(noisy_img));
+    # save("eecs556_mri_pnp/results/denoised_cameraman.png", float32_to_img(denoised_img));
+
+    save(joinpath(dirname(@__FILE__), "results/noisy_cameraman.png"), float32_to_img(noisy_img));
+    save(joinpath(dirname(@__FILE__), "results/denoised_cameraman.png"), float32_to_img(denoised_img));
 end
 
 # W = rand(2, 5)
