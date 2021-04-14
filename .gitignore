@@ -2,3 +2,5 @@
 *.h5
 *.png
 *.pdf
+
+.ipynb_checkpoints/
