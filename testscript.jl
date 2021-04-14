@@ -1,5 +1,6 @@
 # this is the script I've been using to test the different parts/functions of the project
 
+using LinearAlgebra: norm
 using LinearMapsAA
 using MIRT: jim
 using Plots: plot
@@ -34,13 +35,16 @@ y = A*imref[:]
 x0 = reshape(A'*y,M,N)
 j2 = jim(abs.(x0[end:-1:1,end:-1:1]),title="zero-filled recon")
 
+nrmse = (x) -> norm(x.-imref[:],2)/norm(imref,2)
+
 # recon data w/ admm algorithm
 # the primal function is still a little unstable. If you're testing another
 # denoiser, lmk, as I'd like to double check it once we have those ready
-x_hat = admm((z,η,μ) -> primal(z,η,μ,A,B,y), (x) -> dncnn_denoise(Float32.(abs.(x))), 1, x0, niter=10)
+x_hat,funout = admm((z,η,μ) -> primal(z,η,μ,A,B,y), (x) -> dncnn_denoise(Float32.(abs.(x))), 1, x0, niter=10, fun=(x,i)->nrmse(x))
 x_hat = reshape(x_hat,M,N)
 
 j3 = jim(abs.(x_hat[end:-1:1,end:-1:1]),title="admm recon")
 j4 = jim(abs.(imref[end:-1:1,end:-1:1]) - abs.(x_hat[end:-1:1,end:-1:1]),title="subtraction")
 
 plot(j1,j2,j3,j4)
+plot(funout)

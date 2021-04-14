@@ -8,21 +8,26 @@
 #
 # options:
 # niter: # of ADMM iterations
+# fun: monitoring function, evaluated at each iter (eg, (x,i) -> rmse(x))
 #
 # outputs:
 # x: final estimate for x
+# funout: iter+1 vector of monitoring function outputs
 
 function admm(update_x::Function,
     update_z::Function,
     μ::Real,
     x0::AbstractMatrix;
-    niter=10)
+    niter=10,
+    fun::Function=(x,iter) -> 0)
 
     (M,N) = size(x0)
+    funout = zeros(niter+1)
 
     z = x0[:]
     η = Complex.(zeros(size(z)));
     x = update_x(z,η,μ)
+    funout[1] = fun(x,0)
 
     for i = 1:niter
         @info "iter $i"
@@ -31,7 +36,12 @@ function admm(update_x::Function,
         η = η .+ (x.-z)
 
         x = update_x(z,η,μ);
+        funout[i+1] = fun(x,i)
     end
 
-    return x
+    if sum(funout .!= 0) > 0
+        return x, funout
+    else
+        return x
+    end
 end
