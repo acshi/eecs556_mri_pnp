@@ -19,7 +19,7 @@ imref = load_fastmri_data("file1000000.h5")
 j1 = jim(abs.(imref[end:-1:1,end:-1:1]),title="reference")
 
 # def acceleration factor for sampling mask
-R = 3
+R = 5
 Mus = Int(round(M/R))
 
 # create 1D random undersampling mask
@@ -35,7 +35,7 @@ y = A*imref[:]
 x0 = reshape(A'*y,M,N)
 j2 = jim(abs.(x0[end:-1:1,end:-1:1]),title="zero-filled recon")
 
-nrmse = (x) -> norm(x.-imref[:],2)/norm(imref,2)
+nrmse = (x) -> norm(normalize(x).-normalize(imref[:]),2)
 
 # recon data w/ admm algorithm
 # the primal function is still a little unstable. If you're testing another
@@ -46,7 +46,7 @@ x_admm = reshape(x_admm,M,N)
 j3 = jim(abs.(x_admm[end:-1:1,end:-1:1]),title="admm recon")
 j4 = jim(abs.(imref[end:-1:1,end:-1:1]) - abs.(x_admm[end:-1:1,end:-1:1]),title="admm sub")
 
-x_pogm, nrmse_pogm = pogm_restart(x0[:], (x) -> undef, (x) -> A'*(A*x-y), 1,
+x_pogm, nrmse_pogm = pogm_restart(x0[:], (x) -> undef, (x) -> A'*(A*x-y), 2,
     g_prox=(x,c) -> dncnn_denoise(Float32.(abs.(reshape(x,M,N))))[:],
     restart=:none,niter=10,fun=(aa,x,ac,ad) -> nrmse(x))
 
