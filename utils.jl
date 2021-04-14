@@ -11,3 +11,5 @@ ifftq = (k,d) -> fftshift(ifft(ifftshift(k,d),d),d).*size(k,d)
 # also want some 2D versions
 fftq2 = (k) -> fftq(fftq(k,2),1)
 ifftq2 = (k) -> ifftq(ifftq(k,2),1)
+
+normalize = (x) -> abs.(x) |> (x) -> x/max(x...)
