@@ -26,7 +26,7 @@
 using Flux
 using JSON
 using Images
-using ImageCore
+using ImageCore:clamp01nan
 using ImageFiltering
 using Noise
 
