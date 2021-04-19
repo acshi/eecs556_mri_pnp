@@ -140,10 +140,13 @@ function process(fName, R)
     end
 end
 
-if abspath(PROGRAM_FILE) == @__FILE__
-    fName = ARGS[2]
+fNames = ["file1000000.h5", "file1000017.h5", "file1000031.h5", "file1000041.h5", "file1000071.h5", "file1000107.h5",
+          "file1000114.h5", "file1000153.h5", "file1000182.h5", "file1000196.h5", "file1000007.h5", "file1000026.h5",
+          "file1000033.h5", "file1000052.h5", "file1000073.h5", "file1000108.h5", "file1000126.h5", "file1000178.h5",
+          "file1000190.h5", "file1000201.h5"]
 
-    for R in [4, 8, 12]
+for R in [4, 8, 12]
+    for fName in fNames
         process(fName, R)
     end
 end
